@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+git config --global user.email "99791182@163.com"
+git config --global user.name "oabo"
+
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/oabo/vagrantfile.git
+git push -u origin main
