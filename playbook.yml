@@ -2,10 +2,23 @@
 - hosts: all
   become: yes
   tasks:
-    - name: ensure ntpd is at the latest version
-      yum: pkg=ntp state=latest
-      notify:
-      - restart ntpd
+    #- command: "rm -rf  ~/.ssh/" 
+    #- command: "mkdir -p  ~/.ssh/" 
+    #- command : "touch ~/.ssh/authorized_keys"
+    - name: upload ssh pub key 
+      lineinfile:
+        path: .ssh/authorized_keys
+        regexp: '^ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCu4zVl3MynyT6NbTFfD4M2IRUeOQJND8wOLKYCAHxEgqlBwP0m0BdJqGUAhdedO89v/4d/6X6t/XF0LeqO0GJTX14MsbUu0WAdVbdsIE3a+TrfS9bqh2dAnEvbPrxuu/hzd3TOthwPZhg96Gq2tnhTrzzLW4NQofKTQH3Ezd6f2fK6n9fJTxcG4jy4EV6SGUnKL2KMy7AxiYIeo4v3zd2RcBEDr73Xfwe1ihnq3nMvIRIg1iJue287wLaGaPySyt2OL/aEgOHfRDiemoXIN0reJVo1foYVKyACLzcwv4UnblHyJi0hZmoln9Ph7eFgBfJUklmXEDiEFg5eYq7qlr14ozmgN+hLogbHQ+TZWUpRs4yTZry7uaSflHC8a1KnqPaBVNGTQgmfJzQZA92ArKAIeIR+kWC787zgL62j0z1CI8KsYVA/b8ydZGu8WjSacUxZ0fZSsfHWHey/M2OBdLdFtwlpM/UTbo9Q0YbiVp/em64NqrAwRXvc7/8KSdlAeM='
+        line: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCu4zVl3MynyT6NbTFfD4M2IRUeOQJND8wOLKYCAHxEgqlBwP0m0BdJqGUAhdedO89v/4d/6X6t/XF0LeqO0GJTX14MsbUu0WAdVbdsIE3a+TrfS9bqh2dAnEvbPrxuu/hzd3TOthwPZhg96Gq2tnhTrzzLW4NQofKTQH3Ezd6f2fK6n9fJTxcG4jy4EV6SGUnKL2KMy7AxiYIeo4v3zd2RcBEDr73Xfwe1ihnq3nMvIRIg1iJue287wLaGaPySyt2OL/aEgOHfRDiemoXIN0reJVo1foYVKyACLzcwv4UnblHyJi0hZmoln9Ph7eFgBfJUklmXEDiEFg5eYq7qlr14ozmgN+hLogbHQ+TZWUpRs4yTZry7uaSflHC8a1KnqPaBVNGTQgmfJzQZA92ArKAIeIR+kWC787zgL62j0z1CI8KsYVA/b8ydZGu8WjSacUxZ0fZSsfHWHey/M2OBdLdFtwlpM/UTbo9Q0YbiVp/em64NqrAwRXvc7/8KSdlAeM=
+    - name: config dns 
+      lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver 8.8.8.8'
+        line: 'nameserver 8.8.8.8'
+        
+      notify: restart network
+
   handlers:
-    - name: restart ntpd
-      service: name=ntpd state=restarted
+    - name: restart network
+      service: name=network state=restarted
+      ignore_errors: yes
