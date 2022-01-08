@@ -1,6 +1,9 @@
 ---
 - hosts: all
-  become: yes
+  become: true
+  become_user: root
+  vars:
+    dns : 202.101.172.35
   tasks:
     #- command: "rm -rf  ~/.ssh/" 
     #- command: "mkdir -p  ~/.ssh/" 
@@ -10,15 +13,22 @@
         path: .ssh/authorized_keys
         regexp: '^ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCu4zVl3MynyT6NbTFfD4M2IRUeOQJND8wOLKYCAHxEgqlBwP0m0BdJqGUAhdedO89v/4d/6X6t/XF0LeqO0GJTX14MsbUu0WAdVbdsIE3a+TrfS9bqh2dAnEvbPrxuu/hzd3TOthwPZhg96Gq2tnhTrzzLW4NQofKTQH3Ezd6f2fK6n9fJTxcG4jy4EV6SGUnKL2KMy7AxiYIeo4v3zd2RcBEDr73Xfwe1ihnq3nMvIRIg1iJue287wLaGaPySyt2OL/aEgOHfRDiemoXIN0reJVo1foYVKyACLzcwv4UnblHyJi0hZmoln9Ph7eFgBfJUklmXEDiEFg5eYq7qlr14ozmgN+hLogbHQ+TZWUpRs4yTZry7uaSflHC8a1KnqPaBVNGTQgmfJzQZA92ArKAIeIR+kWC787zgL62j0z1CI8KsYVA/b8ydZGu8WjSacUxZ0fZSsfHWHey/M2OBdLdFtwlpM/UTbo9Q0YbiVp/em64NqrAwRXvc7/8KSdlAeM='
         line: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDCu4zVl3MynyT6NbTFfD4M2IRUeOQJND8wOLKYCAHxEgqlBwP0m0BdJqGUAhdedO89v/4d/6X6t/XF0LeqO0GJTX14MsbUu0WAdVbdsIE3a+TrfS9bqh2dAnEvbPrxuu/hzd3TOthwPZhg96Gq2tnhTrzzLW4NQofKTQH3Ezd6f2fK6n9fJTxcG4jy4EV6SGUnKL2KMy7AxiYIeo4v3zd2RcBEDr73Xfwe1ihnq3nMvIRIg1iJue287wLaGaPySyt2OL/aEgOHfRDiemoXIN0reJVo1foYVKyACLzcwv4UnblHyJi0hZmoln9Ph7eFgBfJUklmXEDiEFg5eYq7qlr14ozmgN+hLogbHQ+TZWUpRs4yTZry7uaSflHC8a1KnqPaBVNGTQgmfJzQZA92ArKAIeIR+kWC787zgL62j0z1CI8KsYVA/b8ydZGu8WjSacUxZ0fZSsfHWHey/M2OBdLdFtwlpM/UTbo9Q0YbiVp/em64NqrAwRXvc7/8KSdlAeM=
-    - name: config dns 
-      lineinfile:
-        path: /etc/resolv.conf
-        regexp: '^nameserver 8.8.8.8'
-        line: 'nameserver 8.8.8.8'
-        
-      notify: restart network
+    #- name: config dns 
+    #  command:
+    #    path: /etc/resolv.conf
+    #    regexp: "^nameserver 127.0.0.53"
+    #    line: 'nameserver 8.8.8.8'
+    #- name: config dns 
+    #  command:
+    #    cmd: "sed  -i  's/nameserver 127.0.0.53/nameserver 8.8.8.8/g' /etc/resolv.conf" # not required. The command to run.
 
-  handlers:
-    - name: restart network
-      service: name=network state=restarted
-      ignore_errors: yes
+
+    - template:
+        src: ./template/resolv.conf # required. Path of a Jinja2 formatted template on the Ansible controller. This can be a relative or an absolute path. The file must be encoded with C(utf-8) but I(output_encoding) can be used to control the encoding of the output template.
+        dest: /etc/resolv.conf # required. Location to render the template to on the remote machine.
+        follow: False # not required. Determine whether symbolic links should be followed. When set to C(yes) symbolic links will be followed, if they exist. When set to C(no) symbolic links will not be followed. Previous to Ansible 2.4, this was hardcoded as C(yes).
+        backup: False # not required. Create a backup file including the timestamp information so you can get the original file back if you somehow clobbered it incorrectly.
+        mode: u=rw,g=r,o=r # not required. The permissions the resulting file or directory should have. For those used to I(/usr/bin/chmod) remember that modes are actually octal numbers. You must either add a leading zero so that Ansible's YAML parser knows it is an octal number (like C(0644) or C(01777)) or quote it (like C('644') or C('1777')) so Ansible receives a string and can do its own conversion from string into number. Giving Ansible a number without following one of these rules will end up with a decimal number which will have unexpected results. As of Ansible 1.8, the mode may be specified as a symbolic mode (for example, C(u+rwx) or C(u=rw,g=r,o=r)). As of Ansible 2.6, the mode may also be the special string C(preserve). When set to C(preserve) the file will be given the same permissions as the source file.
+        owner: root  # not required. Name of the user that should own the file/directory, as would be fed to I(chown).
+        group: root # not required. Name of the group that should own the file/directory, as would be fed to I(chown).
+    
